@@ -1,11 +1,11 @@
 #lang racket
 ;TDA ATAQUES
-(require "TDA-CARTA-POKEMON-L1.rkt")
+(require "TDA_CARTA_POKEMON-L1.rkt")
 
-;DEFINICIONES PREVIAS
+; DEFINICIONES PREVIAS
 (define MIN_DAÑO 0)
 
-;CAPA SELECTORA (Funciones Getters)
+; CAPA SELECTORA (Funciones Getters)
 (define GetNombreAtaque   (lambda (Ataque) (car Ataque)))
 (define GetDaño           (lambda (Ataque) (cadr Ataque)))
 (define GetTipoAtaque     (lambda (Ataque) (caddr Ataque)))
@@ -16,7 +16,7 @@
   (lambda ()
     (list "Nombre" 0 "Normal" "Descripción")))
 
-;CAPA DE CONSTRUCCIÓN
+; CAPA DE CONSTRUCCIÓN
 
 (define Ataque ; Ataque representado como lista
   (lambda (Nombre Daño TipoElemental Descripcion)
@@ -25,8 +25,9 @@
 ;CAPA DE PERTENENCIA
 (define EsAtaqueValido?
   (lambda (Ataque)
-    (if (and (string? (GetNombreAtaque Ataque)) (integer? (GetDaño Ataque))(>= (GetDaño Ataque) MIN_DAÑO)
-             (EsTipoElementalValido? Ataque) ;Verificación perteneciente a función del TDA Carta Pokemon
+    (if (string? (GetNombreAtaque Ataque))
+         (if (and (integer? (GetDaño Ataque))(>= (GetDaño Ataque) MIN_DAÑO))
+             (EsTipoElementalValido? Ataque) 
              (string? (GetDescripcion Ataque)))
          #t
          #f)))

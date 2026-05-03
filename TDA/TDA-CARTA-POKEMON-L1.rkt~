@@ -1,5 +1,5 @@
 #lang racket
-(provide CartaPokemon EsCartaPokemon? Pokedex EsTipoElementalValido?)
+(provide CartaPokemon EsCartaPokemon? Pokedex)
 ;TDA CARTA POKÉMON
 ;DEFINCIONES PREVIAS
 (define MIN_PS 0) ; Punto de salud más bajo para una Carta Pokémon
@@ -42,21 +42,21 @@
     ))
 (define GetExEstado
   (lambda (Carta)
-    (car(cdr(cddddr Carta)))))
+    (car(cdr(cddddr Carta))))
+    )
 
-(define GetHabilidadEstado (lambda (Carta) (car (cdr(cdr(cddddr Carta)))))); Obtener Estado de Habilidad de Carta, que indica si el Poéemon tiene o no una habilidad (Sexto elemento)
-(define GetHabilidadDetalle (lambda (Carta) (car (cdr(cdr(cdr(cddddr Carta))))))); Obtener Detalle de Habilidad, que es una lista llena en caso de que sí haya Habilidad, o vacía si no hay Habilidad presente en el Pokémon (Séptimo Elemento)
+(define GetHabilidad (lambda (Carta) (car (cdr(cdr(cddddr Carta)))))); Obtener Habilidad de Carta (Sexto elemento)
 
 ;; CAPA DE MODELACIÓN ;;
 (define CartaPokemonVacia ;Función modeladora, que muestra la estructura y cantidad de variables de una Carta Pokémon sin considerar valores de entrada
   (lambda ()
-    (list "Sin Nombre" "Normal" 0 0 "Básico" #f #f '())
+    (list "Sin Nombre" "Normal" 0 0 "Básico" #f null)
     )
   )
 ;; CAPA DE CONSTRUCCIÓN ;;
 (define CartaPokemon; Función constructora de una carta Pokémon, que permite construir la carta con valores de entrada
-  (lambda (Nombre TipoElemental PS Ataque Nivel ExEstado HabilidadEstado HabilidadDetalle)
-   (list Nombre TipoElemental PS Ataque Nivel ExEstado HabilidadEstado HabilidadDetalle)
+  (lambda (Nombre TipoElemental PS Ataque Nivel ExEstado Habilidad)
+   (list Nombre TipoElemental PS Ataque Nivel ExEstado Habilidad)
     ; La Carta Pokémon será una lista con los atributos: Nombre, TipoElemental, PS, Ataque, Habilidad y Nivel.
    )
  )
@@ -73,15 +73,11 @@
             ; Es el 4to elemento de la Carta, Valor de Ataque, un entero mayor o igal a MIN_ATAQUE? (MIN_ATAQUE: Mínimo valor de ataque)
             (EsNivelValido? CartaPokemon) ; Es el 5to elemento de la Carta un string? (Detalles de Nivel)
             (boolean? (GetExEstado CartaPokemon))
-            (boolean? (GetHabilidadEstado CartaPokemon)) ; Es el 6to elemento de la Carta un string o vacío? (Detalles de Habilidad, opcional)
-            (or(list? (GetHabilidadDetalle CartaPokemon)) (null? (GetHabilidadDetalle CartaPokemon)))
+            (or (string? (GetHabilidad CartaPokemon)) (null? (GetHabilidad CartaPokemon))) ; Es el 6to elemento de la Carta un string o vacío? (Detalles de Habilidad, opcional)
             )
        #t
        #f
        )))
-
-;; CAPA DE MODIFICACIÓN: BAJO PARÁMETROS DE REPRESENTACIÓN INMUTABLE Y AUSENCIA DE ESTADO ;;
-
 
 ;; CAPA DE OTRAS FUNCIONES ;;
 ; Función de Escáner Pokedex
@@ -94,12 +90,24 @@
               "Ataque: " (GetAtaque CartaPokemon) "|"
               "Nivel: " (GetNivel CartaPokemon) "|"
               "Tipo Ex: " (GetExEstado CartaPokemon) "|"
-              "Habilidad: " (if (GetHabilidadEstado CartaPokemon)(GetHabilidadDetalle CartaPokemon) "Ninguna")
+              "Habilidad: " (GetHabilidad CartaPokemon)
               ))
         (raise "Datos Inexistentes de Carta Pokémon")
         )
     )
   )
+;; Definiendo Cartas
+(define Pikachu(CartaPokemon "Pikachu" "Eléctrico" 150 60 "Básico" #f "Thunders"))
+(define Charmander (CartaPokemon "Charmander" "Fuego" 80 50 "Básico" #t "Fire Spitting"))
+(define Torchic (CartaPokemon "Torchic" "Fuego" 60 10 "Básico" #t "Call the Family"))
+;Ejecutando funciones en cartas definidas
+(Pokedex Pikachu)
+(Pokedex Charmander)
+(Pokedex Torchic)
+(GetTipoElemental Charmander)
+(define Void (CartaPokemonVacia))
+(EsCartaPokemon? Void)
 ;; PENDIENTE ;;
+;Plantear mejor el apartado de Habilidad (pensando que puede ser opcional, también es agregable un apartado booleano)
 ;Empezar a trabajar en funciones modificadoras del TDA
-;Empezar a avanzar un TDA juego, TDA jugador, TDA Carta de Energía, TDA Carta de Entrenador. TMSTD!
+;Empezar a avanzar un TDA juego, TDA jugador, TDA Carta de Energía, TDA Carta de Entrenador
