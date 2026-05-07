@@ -1,20 +1,24 @@
 #lang racket
-;TDA ATAQUES
-(require "TDA-CARTA-POKEMON-L1.rkt")
-
-;DEFINICIONES PREVIAS
+;; TDA ATTACKS ;;
+(require "TDA-CARD.rkt")
+; 1) Definiciones previas para TDA
 (define MIN_DAÑO 0)
+
+; 2) Capa de Modelación
+; Estructura de constructor attack : (list cost nombre texto funciondedaño) 
+(define EmptyAttack ; Valores neutros para un Ataque
+  (lambda ()
+    (list '() "Name" "Description" 'procedure)))
+; Descripción: Función Modeladora que representa la estructura de una lista de ataques, con valores nulos y neutrales.
+; Dominio: null
+; Recorrido: (list)
+; Tipo de Recursión: No aplica
 
 ;CAPA SELECTORA (Funciones Getters)
 (define GetNombreAtaque   (lambda (Ataque) (car Ataque)))
 (define GetDaño           (lambda (Ataque) (cadr Ataque)))
 (define GetTipoAtaque     (lambda (Ataque) (caddr Ataque)))
 (define GetDescripcion    (lambda (Ataque) (cadddr Ataque)))
-
-;CAPA DE MODELACIÓN
-(define AtaqueVacio ; Valores neutros para un Ataque
-  (lambda ()
-    (list "Nombre" 0 "Normal" "Descripción")))
 
 ;CAPA DE CONSTRUCCIÓN
 
@@ -23,10 +27,4 @@
     (list Nombre Daño TipoElemental Descripcion)))
 
 ;CAPA DE PERTENENCIA
-(define EsAtaqueValido?
-  (lambda (Ataque)
-    (if (and (string? (GetNombreAtaque Ataque)) (integer? (GetDaño Ataque))(>= (GetDaño Ataque) MIN_DAÑO)
-             (EsTipoElementalValido? Ataque) ;Verificación perteneciente a función del TDA Carta Pokemon
-             (string? (GetDescripcion Ataque)))
-         #t
-         #f)))
+

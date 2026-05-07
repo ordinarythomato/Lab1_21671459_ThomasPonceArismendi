@@ -1,4 +1,5 @@
 #lang racket
+(provide ELEMENT-TYPE)
 ;; TDA CARD ;;
 
 ; 1) Definiciones previas para TDA
@@ -44,7 +45,7 @@
 
 ; 3) Capa de Construcción
 (define card
-  (lambda (chosen-card-type name list_of_arguments)
+  (lambda (chosen-card-type name . list_of_arguments)
     (if (card-type? chosen-card-type)
     (cons chosen-card-type (cons name list_of_arguments))
     (raise "Error: Unvalid type of card")
@@ -59,14 +60,13 @@
 ; 4.1) Definiciones previas
 (define MIN_HP 0) ; Punto de salud más bajo para una Carta Pokémon
 (define MIN_ATAQUE 0) ; Ataque más bajo que puede influir en Carta Pokémon
-(define POKEMON-TYPE '(basic stage1 stage2))
 (define TRAINER-TYPE '(item supporter)); Item -> Carta de Entrenador Objeto | Supporter -> Carta de Entrenador Partidario
 
 ; 4.2) Funciones de Selección para Card general (Card Getters)
 ; |OBSERVACIÓN|: Los Selectores (o "Getters") se han definido primero porque ayudan a armar y validar las funciones de las capas sucesoras  (Pertenencia y demás)
 
 (define GetCardType
-  (lambda (Carta) (car Carta)))
+  (lambda (Carta)(car Carta)))
 ; Descripción: Función para obtener Tipo de Carta (1er elemento), consultando: Pertenece el primer elemento de la carta a la lista de Tipos de Carta.
 ; Dominio: (Carta) (card)
 ; Recorrido: (CARD-TYPE)
@@ -82,70 +82,60 @@
 ; Tipo de Recursión: No Aplica
 
 ; 4.3) Funciones de Selección para Carta Pokemon
-; Estructura de Carta Pokemon: (TypeOfCard name HP ListOfAttacks Ability EvolvesFrom IsEx? TypeOfPokemon Weakness Resistence RetiringCost)
+; Estructura: (TypeOfCard name EvolvesFrom HP TypeOfPokemon Weakness Resistance RetiringCost IsEx? Ability ListOfAttacks)
 
-(define GetHP (lambda (Carta) (caddr Carta)))
-; Descripción: Función para obtener Puntos de Salud de Carta Pokemon (Tercer elemento)
+(define GetEvolutionAscendant (lambda (Carta) (caddr Carta)))
+; Descripción: Obtener Pokemon del que evolucionó la Carta Pokemon evaluada (Tercer elemento)
 ; Dominio: (Carta) (card)
-; Recorrido: (caddr Carta) (integer)
+; Recorrido: (caddr Carta) (string v null)
 ; Tipo de Recursión: No Aplica
 
-(define GetListOfAttacks (lambda (Carta) (cadddr Carta)))
-; Descripción: Función para obtener Lista de Ataques (Cuarto elemento)
+(define GetHP (lambda (Carta) (cadddr Carta)))
+; Descripción: Obtener Puntos de Salud (Cuarto elemento)
 ; Dominio: (Carta) (card)
-; Recorrido: (cadddr Carta) (list)
+; Recorrido: (cadddr Carta) (integer)
 ; Tipo de Recursión: No Aplica
 
-(define GetAbility (lambda (Carta) (cadr (cdddr Carta))))
-; Descripción: Función para obtener Habilidad, que es un tipo de Ataque (Quinto Elemento)
+(define GetTypeOfPokemon (lambda (Carta) (car (cddddr Carta))))
+; Descripción: Obtener Tipo Elemental del Pokemon evaluado (Quinto elemento)
 ; Dominio: (Carta) (card)
-; Recorrido: ((cadr (cdddr Carta)) (list)
+; Recorrido: (car (cddddr Carta)) (ELEMENT-TYPE)
 ; Tipo de Recursión: No Aplica
 
-(define GetEvolutionAscendant (lambda (Carta) (caddr (cdddr Carta))))
-; Descripción: Función para obtener Pokemon del que evolucionó el Pokemon de la Carta Evaluada
+(define GetWeakness (lambda (Carta) (cadr (cddddr Carta))))
+; Descripción: Obtener Debilidad del Pokemon (Sexto elemento)
 ; Dominio: (Carta) (card)
-; Recorrido: (cadddr (cdddr Carta)) (card)
+; Recorrido: (cadr (cddddr Carta)) (ELEMENT-TYPE)
 ; Tipo de Recursión: No Aplica
 
-(define GetExState (lambda (Carta) (car(cdddr (cdddr Carta)))))
-; Descripción: Función para obtener estado Ex de Pokemon (permite saber si el Pokemon es de tipo Ex o no)
+(define GetResistance (lambda (Carta) (caddr (cddddr Carta))))
+; Descripción: Obtener Tipo Elemental que provoca Resistencia en el Pokemon (Séptimo elemento)
 ; Dominio: (Carta) (card)
-; Recorrido: (cadr(cdddr (cdddr Carta))) (boolean)
+; Recorrido: (caddr (cddddr Carta)) (ELEMENT-TYPE)
 ; Tipo de Recursión: No Aplica
 
-(define GetTypeOfPokemon (lambda (Carta)(cadr(cdddr (cdddr Carta)))))
-; Descripción: Función para obtener Tipo del Pokemon (Si es Básico, Fase 1 o Fase 2)
+(define GetRetiringCost (lambda (Carta) (cadddr (cddddr Carta))))
+; Descripción: Obtener Costo de Retiro, expresado en un cantidad entera positiva de Incoloros (Octavo elemento)
 ; Dominio: (Carta) (card)
-; Recorrido: (caddr(cdddr (cdddr Carta))) (POKEMON-TYPE)
+; Recorrido: (cadddr (cddddr Carta)) (integer)
 ; Tipo de Recursión: No Aplica
 
-(define GetWeakness (lambda (Carta) (caddr(cdddr (cdddr Carta)))))
-; Descripción: Función para obtener Debilidad del Pokemon (Que es un tipo de Elemento que debilita la defensa del Pokemon)
+(define GetExState (lambda (Carta) (car (cddddr (cddddr Carta)))))
+; Descripción: Obtener estado Ex del Pokemon (Noveno elemento)
 ; Dominio: (Carta) (card)
-; Recorrido: (cadddr(cdddr (cdddr Carta))) (ELEMENT-TYPE)
+; Recorrido: (car (cddddr (cddddr Carta))) (boolean)
 ; Tipo de Recursión: No Aplica
 
-(define GetResistance (lambda (Carta) (car (cdddr(cdddr (cdddr Carta))))))
-; Descripción: Función para obtener Elemento que hace Resistencia en el Pokemon de Carta (Es un tipo de Elemento)
+(define GetAbility (lambda (Carta) (cadr (cddddr (cddddr Carta)))))
+; Descripción: Obtener Habilidad del Pokemon (Décimo elemento)
 ; Dominio: (Carta) (card)
-; Recorrido: (cadr (cdddr(cdddr (cdddr Carta)))) (ELEMENT-TYPE)
+; Recorrido: (cadr (cddddr (cddddr Carta))) (list)
 ; Tipo de Recursión: No Aplica
 
-(define GetRetiringCost (lambda (Carta) (cadr (cdddr (cdddr(cdddr Carta))))))
-; Descripción: Función para obtener la cantidad de energías incoloras requeridas para la retirada del Pokemon en la Posición Activa
+(define GetListOfAttacks (lambda (Carta) (caddr (cddddr (cddddr Carta)))))
+; Descripción: Obtener Lista de Ataques (Undécimo elemento)
 ; Dominio: (Carta) (card)
-; Recorrido: (caddr (cdddr (cdddr(cdddr Carta)))) (integer)
-; Tipo de Recursión: No Aplica
-
-; 4.4) Funciones de Selección para Carta de Energía
-; Estructura de Carta de Energía: (TypeOfCard name TypeOfEnergy)
-; GetTypeOfCard -> Previamente definida
-; GetName -> Previamente definida
-(define GetTypeOfEnergy (lambda (Carta) (caddr Carta)))
-; Descripción: Función para obtener el Tipo de Energía de una Carta de Energía (Que corresponde a uno de los elementos de ELEMENT_TYPE)
-; Dominio: (Carta) (card)
-; Recorrido: (caddr Carta) (ELEMENT_TYPE)
+; Recorrido: (caddr (cddddr (cddddr Carta))) (list)
 ; Tipo de Recursión: No Aplica
 
 ; 4.5) Funciones de Selección para Carta de Entrenador
@@ -165,20 +155,26 @@
 ; Tipo de Recursión: No Aplica
 
 (define GetActionsFunction (lambda (Carta) (cadr (cddddr Carta))))
-; Descripción: Función para obtener el Componente de Función de Acciones, perteneciente a la Carta de Entrenador.
-; La Función de Acciones será considerada una variable de tipo procedure.
+; Descripción: Función para obtener el Componente de Función de Acciones, perteneciente a la Carta de Entrenador,
+; donde la Función de Acciones será considerada una variable de tipo procedure
 ; Dominio: (Carta) (card)
 ; Recorrido: (cadr (cddddr Carta)) (procedure)
 ; Tipo de Recursión: No Aplica
 
-; 5) Capa de Pertenencia
+; 4.6) Función de Selección para Carta de Energía
+; Estructura de Carta de Energía: (TypeOfCard name EnergyType)
+(define GetTypeOfEnergy (lambda (Carta) (caddr Carta)))
+; Descripción: Obtener Tipo de Energía para Carta de Energía (Tercer elemento)
+; Dominio: (Carta) (card)
+; Recorrido: (caddr Carta) (ELEMENT-TYPE)
+; Tipo de Recursión: No Aplica
 
 ; 5.1) Función de Pertenencia para Carta en General
 (define IsCard?
   (lambda (Carta)
-    (and (card-type? (GetCardType Carta)) (string? (GetName Carta)) (list? (cdr Carta))
+    (and (card-type? (GetCardType Carta)) (string? (GetName Carta)) (or (list? (cdr Carta)) (null? (cdr Carta)))
     )))
-; Descripción: Función para verificar que una carta cualquiera pertenezca al objeto Card (del que deriva la Carta Pokemon, Entrenador y Energía)
+; Descripción: Función para verificar que una carta cualquiera pertenezca al objeto card (del que derivan las Cartas Pokemon, Entrenador y Energía)
 ; Dominio: (Carta) (Card)
 ; Recorrido: boolean
 ; Tipo de Recursión: No Aplica
@@ -186,9 +182,10 @@
 ; 5.2) Función de Pertenencia para Carta Pokemon
 (define IsPokemonCard?
   (lambda (Carta)
-    (and (IsCard? Carta) (integer? (GetHP Carta)) (>= (GetHP Carta) MIN_HP) (list? (GetListOfAttacks Carta)) (list? (GetAbility Carta))
-         (list? (GetEvolutionAscendant Carta)) (boolean? (GetExState Carta))
-         (member (GetTypeOfPokemon Carta) POKEMON-TYPE) (element-type? (GetWeakness Carta)) (element-type? (GetResistance Carta))
+    (and (IsCard? Carta) (integer? (GetHP Carta)) (> (GetHP Carta) MIN_HP) (list? (GetListOfAttacks Carta))
+         (list? (GetAbility Carta))
+         (or (string? (GetEvolutionAscendant Carta)) (null? (GetEvolutionAscendant Carta))) (boolean? (GetExState Carta))
+         (member (GetTypeOfPokemon Carta) ELEMENT-TYPE) (element-type? (GetWeakness Carta)) (element-type? (GetResistance Carta))
          (or (>= (GetRetiringCost Carta) 1) (null? (GetRetiringCost Carta))))
     ))
 ; Descripción: Función que verifica que una lista hecha a partir del constructor card sea una carta con atributos de carta Pokemon.
@@ -214,7 +211,22 @@
     ))
 ; Descripción: Función que comprueba si una carta hecha a través del constructor card es una carta de entrenador
 ; Dominio: (Carta) (card)
-; Tipo de Recursión: boolean
+; Recorrido: boolean
+; Tipo de Recursión: No Aplica
 
-; 6) Capa de modificación
-
+; 6) Capa de modificación (Funciones Setters)
+; 6.1) Funciones de Modificación para Carta Pokemon
+(define SetHP
+  (lambda
+      (CartaPokemon NewHP)
+    (if (and (IsPokemonCard? CartaPokemon) (integer? NewHP))
+         (card (GetCardType CartaPokemon) (GetName CartaPokemon) (GetEvolutionAscendant CartaPokemon)
+               NewHP (GetTypeOfPokemon CartaPokemon) (GetWeakness CartaPokemon) (GetResistance CartaPokemon)
+               (GetRetiringCost CartaPokemon) (GetExState CartaPokemon) (GetAbility CartaPokemon)
+               (GetListOfAttacks CartaPokemon))
+         (raise "Error. Input Card has no correct Pokemon data or input Health Points are unvalid")
+         )))
+; Descripción: Función que altera el valor de los Puntos de Salud de un Pokemon
+; Dominio: (CartaPokemon) (card) x (NewHP) (integer)
+; Recorrido: (CartaPokemon) (card)
+; Tipo de Recursión: No aplica
