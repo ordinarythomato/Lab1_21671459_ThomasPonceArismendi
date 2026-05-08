@@ -50,8 +50,8 @@
     (cons chosen-card-type (cons name list_of_arguments))
     (raise "Error: Unvalid type of card")
     )))
-; Descripción: Función constructora de carta que recibe 3 variables: un tipo de carta, un nombre de carta y una lista de argumentos.
-; Si la entrada contiene un tipo de carta perteneciente a CARD-TYPE, entonces se retorna una lista única con todas las variables presentes.
+; Descripción: Función constructora de carta (card) que recibe 3 variables: un tipo de carta, un nombre de carta y una lista variable de argumentos
+; Si la entrada contiene un tipo de carta perteneciente a CARD-TYPE, entonces se retorna una lista única con todas las variables presentes
 ; Dominio: chosen-card-type (CARD-TYPE) X name (string) X list_of_arguments (list)
 ; Recorrido: list
 ; Tipo de Recursión: No Aplica
@@ -62,12 +62,20 @@
 (define MIN_ATAQUE 0) ; Ataque más bajo que puede influir en Carta Pokémon
 (define TRAINER-TYPE '(item supporter)); Item -> Carta de Entrenador Objeto | Supporter -> Carta de Entrenador Partidario
 
+(define (trainer-type? t)
+  (and (symbol? t) (member t TRAINER-TYPE)))
+; Descripción: Función que verifica si la entrada es un tipo de Carta de Entrenador verdadera siempre y cuando sea un símbolo perteneciente a la lista TRAINER-TYPE
+; Dominio: t (TRAINER-TYPE)
+; Recorrido: boolean
+; Tipo de Recursión: No aplica
+
+
 ; 4.2) Funciones de Selección para Card general (Card Getters)
 ; |OBSERVACIÓN|: Los Selectores (o "Getters") se han definido primero porque ayudan a armar y validar las funciones de las capas sucesoras  (Pertenencia y demás)
 
 (define GetCardType
   (lambda (Carta)(car Carta)))
-; Descripción: Función para obtener Tipo de Carta (1er elemento), consultando: Pertenece el primer elemento de la carta a la lista de Tipos de Carta.
+; Descripción: Función para obtener Tipo de Carta (1er elemento)
 ; Dominio: (Carta) (card)
 ; Recorrido: (CARD-TYPE)
 ; Tipo de Recursión: No Aplica
@@ -175,7 +183,7 @@
     (and (card-type? (GetCardType Carta)) (string? (GetName Carta)) (or (list? (cdr Carta)) (null? (cdr Carta)))
     )))
 ; Descripción: Función para verificar que una carta cualquiera pertenezca al objeto card (del que derivan las Cartas Pokemon, Entrenador y Energía)
-; Dominio: (Carta) (Card)
+; Dominio: (Carta) (card)
 ; Recorrido: boolean
 ; Tipo de Recursión: No Aplica
 
@@ -188,12 +196,12 @@
          (member (GetTypeOfPokemon Carta) ELEMENT-TYPE) (element-type? (GetWeakness Carta)) (element-type? (GetResistance Carta))
          (or (>= (GetRetiringCost Carta) 1) (null? (GetRetiringCost Carta))))
     ))
-; Descripción: Función que verifica que una lista hecha a partir del constructor card sea una carta con atributos de carta Pokemon.
+; Descripción: Función que verifica que una lista hecha a partir del constructor card sea una carta con atributos de carta Pokemon
 ; Dominio: (Carta) (card)
 ; Recorrido: boolean
 ; Tipo de Recursión: No Aplica
 
-; |OBSERVACIÓN|: El Costo de Retiro de un Pokemon puede ser de dos tipos: Entero (valor mayor o igual a 1), o Vacío (en representación de que el Pokemon no tiene costo de retiro).
+; |OBSERVACIÓN|: El Costo de Retiro de un Pokemon puede ser de dos tipos: Entero (valor mayor o igual a 1), o Vacío (en representación de que el Pokemon no tiene costo de retiro)
 ; 5.3) Función de Pertenencia para Carta de Energía
 (define IsEnergyCard?
   (lambda (Carta)
@@ -216,7 +224,7 @@
 
 ; 6) Capa de modificación (Funciones Setters)
 ; 6.1) Funciones de Modificación para Carta Pokemon
-(define SetHP
+(define SetPokemonHP
   (lambda
       (CartaPokemon NewHP)
     (if (and (IsPokemonCard? CartaPokemon) (integer? NewHP))
@@ -224,9 +232,167 @@
                NewHP (GetTypeOfPokemon CartaPokemon) (GetWeakness CartaPokemon) (GetResistance CartaPokemon)
                (GetRetiringCost CartaPokemon) (GetExState CartaPokemon) (GetAbility CartaPokemon)
                (GetListOfAttacks CartaPokemon))
-         (raise "Error. Input Card has no correct Pokemon data or input Health Points are unvalid")
+         (raise "Error. Input Card has no correct Pokemon data or input Health Points number is unvalid")
          )))
-; Descripción: Función que altera el valor de los Puntos de Salud de un Pokemon
-; Dominio: (CartaPokemon) (card) x (NewHP) (integer)
+; Descripción: Función que altera el valor de los Puntos de Salud de un Pokemon, desde una entrada Carta Pokemon y un nuevo puntaje de salud
+; Dominio: (CartaPokemon) (card) X (NewHP) (integer)
 ; Recorrido: (CartaPokemon) (card)
+; Tipo de Recursión: No aplica
+(define SetPokemonName
+  (lambda
+      (CartaPokemon NewName)
+    (if (and (IsPokemonCard? CartaPokemon) (string? NewName))
+         (card (GetCardType CartaPokemon) NewName (GetEvolutionAscendant CartaPokemon)
+               (GetHP CartaPokemon) (GetTypeOfPokemon CartaPokemon) (GetWeakness CartaPokemon) (GetResistance CartaPokemon)
+               (GetRetiringCost CartaPokemon) (GetExState CartaPokemon) (GetAbility CartaPokemon)
+               (GetListOfAttacks CartaPokemon))
+         (raise "Error. Input Card has no correct Pokemon data or input Pokemon Name is unvalid")
+         ))
+  )
+; Descripción: Función que altera el valor de nombre de un Pokemon, desde una entrada Carta Pokemon y un string que será el nuevo nombre
+; Dominio: (CartaPokemon) (card) X (NewName) (string)
+; Recorrido: (CartaPokemon) (card)
+; Tipo de Recursión: No aplica
+(define SetEvolutionAscendantName
+  (lambda
+      (CartaPokemon AscendantName)
+    (if (and (IsPokemonCard? CartaPokemon) (or (string? AscendantName)(null? AscendantName)))
+         (card (GetCardType CartaPokemon) (GetName CartaPokemon) AscendantName
+               (GetHP CartaPokemon) (GetTypeOfPokemon CartaPokemon) (GetWeakness CartaPokemon) (GetResistance CartaPokemon)
+               (GetRetiringCost CartaPokemon) (GetExState CartaPokemon) (GetAbility CartaPokemon)
+               (GetListOfAttacks CartaPokemon))
+         (raise "Error. Input Card has no correct Pokemon data or input Ascendant Name is unvalid")
+         ))
+  )
+; Descripción: Función que altera el dato de predecesor evolutivo del Pokemon, desde una entrada Carta Pokemon y un string que será el nombre del ancestro evolutivo
+; Dominio: (CartaPokemon) (card) X (AscendantName) (string)
+; Recorrido: (CartaPokemon) (card)
+; Tipo de Recursión: No aplica
+(define SetPokemonWeakness
+  (lambda
+      (CartaPokemon Weakness)
+    (if (and (IsPokemonCard? CartaPokemon) (element-type? Weakness))
+         (card (GetCardType CartaPokemon) (GetName CartaPokemon) (GetEvolutionAscendant CartaPokemon)
+               (GetHP CartaPokemon) (GetTypeOfPokemon CartaPokemon) Weakness (GetResistance CartaPokemon)
+               (GetRetiringCost CartaPokemon) (GetExState CartaPokemon) (GetAbility CartaPokemon)
+               (GetListOfAttacks CartaPokemon))
+         (raise "Error. Input Card has no correct Pokemon data or input Weakness is unvalid")
+         ))
+  )
+; Descripción: Función que altera el dato de Debilidad del Pokemon, desde una entrada Carta Pokemon y un símbolo de tipo elemental que será la debilidad del pokemon
+; Dominio: (CartaPokemon) (card) X (Weakness) (ELEMENT-TYPE)
+; Recorrido: (CartaPokemon) (card)
+; Tipo de Recursión: No aplica
+(define SetPokemonAttacks
+    (lambda
+      (CartaPokemon Attacks)
+    (if (and (IsPokemonCard? CartaPokemon) (list? Attacks))
+         (card (GetCardType CartaPokemon) (GetName CartaPokemon) (GetEvolutionAscendant CartaPokemon)
+               (GetHP CartaPokemon) (GetTypeOfPokemon CartaPokemon) (GetWeakness CartaPokemon) (GetResistance CartaPokemon)
+               (GetRetiringCost CartaPokemon) (GetExState CartaPokemon) (GetAbility CartaPokemon)
+               Attacks)
+         (raise "Error. Input Card has no correct Pokemon data or input Attacks list is unvalid")
+         ))
+  )
+; Descripción: Función que altera la lista de ataques (perteneciente al TDA ATTACKS de constructor attack) del Pokemon, desde una entrada Carta Pokemon y una lista proveniente del constructor attack
+; Dominio: (CartaPokemon) (card) X (Attacks) (attack)
+; Recorrido: (CartaPokemon) (card)
+; Tipo de Recursión: No aplica
+(define SetPokemonResistance
+    (lambda
+      (CartaPokemon Resistance)
+    (if (and (IsPokemonCard? CartaPokemon) (element-type? Resistance))
+         (card (GetCardType CartaPokemon) (GetName CartaPokemon) (GetEvolutionAscendant CartaPokemon)
+               (GetHP CartaPokemon) (GetTypeOfPokemon CartaPokemon) (GetWeakness CartaPokemon) Resistance
+               (GetRetiringCost CartaPokemon) (GetExState CartaPokemon) (GetAbility CartaPokemon)
+               (GetListOfAttacks CartaPokemon))
+         (raise "Error. Input Card has no correct Pokemon data or input Resistance is unvalid")
+         ))
+  )
+; Descripción: Función que altera la resistencia del Pokemon, desde una entrada Carta Pokemon y un símbolo de tipo elemental que será la debilidad del pokemon
+; Dominio: (CartaPokemon) (card) X (Resistance) (ELEMENT-TYPE)
+; Recorrido: (CartaPokemon) (card)
+; Tipo de Recursión: No aplica
+(define SetPokemonRetiringCost
+      (lambda
+      (CartaPokemon RetiringCost)
+    (if (and (IsPokemonCard? CartaPokemon) (or (integer? RetiringCost) (> RetiringCost 0) (null? RetiringCost)))
+         (card (GetCardType CartaPokemon) (GetName CartaPokemon) (GetEvolutionAscendant CartaPokemon)
+               (GetHP CartaPokemon) (GetTypeOfPokemon CartaPokemon) (GetWeakness CartaPokemon) (GetResistance CartaPokemon)
+               RetiringCost (GetExState CartaPokemon) (GetAbility CartaPokemon)
+               (GetListOfAttacks CartaPokemon))
+         (raise "Error. Input Card has no correct Pokemon data or input Retiring Cost is unvalid")
+         ))
+  )
+; Descripción: Función que altera el número de energías para retiro del Pokemon, desde una entrada Carta Pokemon y un valor entero positivo (o lista vacía) que representa la presencia de energías de retiro
+; Dominio: (CartaPokemon) (card) X (Resistance) (integer v null)
+; Recorrido: (CartaPokemon) (card)
+; Tipo de Recursión: No aplica
+(define SetPokemonAbility
+    (lambda
+      (CartaPokemon Ability)
+    (if (and (IsPokemonCard? CartaPokemon) (list? Ability))
+         (card (GetCardType CartaPokemon) (GetName CartaPokemon) (GetEvolutionAscendant CartaPokemon)
+               (GetHP CartaPokemon) (GetTypeOfPokemon CartaPokemon) (GetWeakness CartaPokemon) (GetResistance CartaPokemon)
+               (GetRetiringCost CartaPokemon) (GetExState CartaPokemon) Ability
+               (GetListOfAttacks CartaPokemon))
+         (raise "Error. Input Card has no correct Pokemon data or input Ability list is unvalid")
+         ))
+  )
+; Descripción: Función que altera la habilidad (perteneciente al TDA ATTACKS de constructor attack) del Pokemon, desde una entrada Carta Pokemon y una lista proveniente del constructor attack
+; Dominio: (CartaPokemon) (card) X (Ability) (attack)
+; Recorrido: (CartaPokemon) (card)
+; Tipo de Recursión: No aplica
+(define SetPokemonExState
+    (lambda
+      (CartaPokemon ExState)
+    (if (and (IsPokemonCard? CartaPokemon) (boolean? ExState))
+         (card (GetCardType CartaPokemon) (GetName CartaPokemon) (GetEvolutionAscendant CartaPokemon)
+               (GetHP CartaPokemon) (GetTypeOfPokemon CartaPokemon) (GetWeakness CartaPokemon) (GetResistance CartaPokemon)
+               (GetRetiringCost CartaPokemon) ExState (GetAbility CartaPokemon)
+               (GetListOfAttacks CartaPokemon))
+         (raise "Error. Input Card has no correct Pokemon data or input Ex State is unvalid")
+         ))
+  )
+; Descripción: Función que altera el estado EX del Pokemon, desde una entrada Carta Pokemon y un booleano que indica si el Pokemon es EX o no
+; Dominio: (CartaPokemon) (card) X (ExState) (booleano)
+; Recorrido: (CartaPokemon) (card)
+; Tipo de Recursión: No aplica
+(define SetPokemonType
+    (lambda
+      (CartaPokemon PokemonType)
+    (if (and (IsPokemonCard? CartaPokemon) (element-type? PokemonType))
+         (card (GetCardType CartaPokemon) (GetName CartaPokemon) (GetEvolutionAscendant CartaPokemon)
+               (GetHP CartaPokemon) PokemonType (GetWeakness CartaPokemon) (GetResistance CartaPokemon)
+               (GetRetiringCost CartaPokemon) (GetExState CartaPokemon) (GetAbility CartaPokemon)
+               (GetListOfAttacks CartaPokemon))
+         (raise "Error. Input Card has no correct Pokemon data or input Ex State is unvalid")
+         ))
+  )
+; Descripción: Función que altera el tipo de elemento que identifica la naturaleza del Pokemon, desde una entrada Carta Pokemon y un símbolo de tipo elemental
+; Dominio: (CartaPokemon) (card) X (PokemonType) (ELEMENT-TYPE)
+; Recorrido: (CartaPokemon) (card)
+; Tipo de Recursión: No aplica
+
+; 6.2) Funciones de Modificación para Carta de Entrenador
+; Estructura de Carta de Entrenador: (TypeOfCard name TrainerType description ActionsFunction)
+(define SetTrainerName
+  (lambda (CartaEntrenador NewName)
+    (if (and (IsTrainerCard? CartaEntrenador) (string? NewName)) 
+        (card (GetCardType CartaEntrenador) NewName (GetTrainerType CartaEntrenador) (GetTrainerDescription CartaEntrenador) (GetActionsFunction CartaEntrenador))
+        (raise "Error. Input card has no correct Trainer data or input name is unvalid"))
+    ) )
+; Descripción: Función que altera el valor de nombre de una Carta de Entrenador, desde una entrada Carta de Entrenador y un string que será el nuevo nombre
+; Dominio: (CartaEntrenador) (card) X (NewName) (string)
+; Recorrido: (CartaEntrenador) (card)
+; Tipo de Recursión: No aplica
+(define SetTrainerType
+  (lambda (CartaEntrenador NewType)
+    (if (and (IsTrainerCard? CartaEntrenador) (trainer-type? NewType))
+        (card (GetCardType CartaEntrenador) NewName (GetTrainerType CartaEntrenador) (GetTrainerDescription CartaEntrenador) (GetActionsFunction CartaEntrenador))
+        (raise "Error. Input card has no correct Trainer data or input name is unvalid"))
+    ) )
+; Descripción: Función que altera el valor de nombre de una Carta de Entrenador, desde una entrada Carta de Entrenador y un string que será el nuevo nombre
+; Dominio: (CartaEntrenador) (card) X (NewName) (string)
+; Recorrido: (CartaEntrenador) (card)
 ; Tipo de Recursión: No aplica
