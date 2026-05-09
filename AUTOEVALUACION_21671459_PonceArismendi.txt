@@ -1,0 +1,26 @@
+RF01: TDAs - Especificación e implementación de abstracciones: 0.75
+RF02: TDA Attacks - constructor (attack): 1
+RF03: TDA Card - constructor (card): 1
+RF04: TDA Deck - constructor (deck): 1
+RF05: TDA Deck - barajar cartas (shuffleDeck): 0
+RF06: Iniciar juego (initGame): 0
+RF07: Representación del juego como string (printGame): 0
+RF08: Poner pokemon en banca (playToBench): 0
+RF09: Cambiar pokemon activo (changeActivePokemon): 0
+RF10: Robar carta del mazo (drawCardFromDeck): 0
+RF11: Usar carta de energía (useEnergyCard): 0
+RF12: Evolucionar pokemon (evolvePokemon): 0
+RF13: Usar carta de entrenador (useTrainerCard): 0
+RF14: Usar habilidad pokemon (usePokemonAbility): 0
+RF15: Usar ataque pokemon (usePokemonAttack): 0
+
+RNF1: Autoevaluación: 1
+RNF2: Lenguaje: 1
+RNF3: Versión: 1
+RNF4: Standard: 1
+RNF5: No variables: 1
+RNF6: Documentación: 1
+RNF7: Dom->Rec: 1
+RNF8: Organización: 1
+RNF9: Historial: 0.25
+RNF10: Script de pruebas: 0
